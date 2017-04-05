@@ -15,4 +15,5 @@ if(preg_match($preg,$name)){
     echo "不要超过20个字符";
 }else{
     echo "输入有误";
-};
+}
+?>

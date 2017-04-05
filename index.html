@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    html,body{height:100%;background:#f3f3f3;overflow:auto;margin:0;}.mb-15{margin-bottom:15px;}
+    div,dl,dt,dd,p{padding:0;margin:0;}.p-r{position:relative;}input:focus{outline:none;}
+    .view{width:80%;height:100%;margin:0 auto;font-size:0;padding:20px 0;box-sizing:border-box;}
+    .view-login{display:inline-block;vertical-align:top;width:100%;height:100%;}
+    .wrap{background:#fff;padding:15px 20px;box-shadow:0 0 5px #ccc;height:100%;box-sizing:border-box;}
+    .wrap h2{font-size:18px;padding:20px 0 20px 10px;font-weight:normal;color:#338CEA;position:relative;margin:0;}
+    .wrap h2:before{content:"";display:inline-block;width:3px;height:1em;position:absolute;left:0;top:50%;margin-top:-0.5em;background:#338CEA;}
+    .wrap input{display:inline-block;width:50%;border:1px solid #ccc;padding:8px 1em;font-size:14px;color:#333;box-sizing:border-box;vertical-align:top;}
+    .wrap input.wrong{border-color:#E15671;}
+    .wrap input:focus{border-color:#338CEA;}
+    .wrap .btn{display:block;width:50%;background:#338CEA;padding:8px 1em;font-size:14px;color:#fff;box-sizing:border-box;text-decoration:none;text-align:center;}
+    .wrap .btn:active{opacity:0.9;}
+    .tips{font-size:12px;color:#999;margin:0;height:34px;line-height:34px;display:inline-block;vertical-align:top;position:relative;padding-left:1em;}
+    .tips.wrong{color:#E15671;}
+    .tips.right:before{content:url('right.png');}
+    .wrap .table{width:100%;border-collapse:collapse;border-spacing:0;}
+    .wrap .table th,.wrap .table td{font-size:14px;color:#666;font-weight:normal;padding:10px;text-align:center;border-bottom:1px solid #dfdfdf;}
+  </style>
+</head>
+<body>
+  <!--
+    注册的用户列表同步展示。点击注册后，数据提交到数据库，同时数据库中的数据反映到列表中
+    登录的验证什么
+    邮箱验证是怎么发送的
+  -->
+  <div class="view">
+    <div class="view-login">
+      <div class="wrap">
+        <h2>注册</h2>
+        <form action="">
+          <div class="p-r mb-15 wrap-input">
+            <input type="text" name="username" placeholder="用户名" id="username">
+            <p id="verifyName" class="tips">用户名请用中文、英文或数字的组合并且为6-20个字符</p>
+          </div>
+          <div class="p-r mb-15 wrap-input">
+            <input type="text" name="password" placeholder="密码" id="password">
+            <p id="verifyPassword" class="tips"></p>
+          </div>
+          <a href="#" class="btn" id="regis">注册</a>
+        </form>
+        <h2>注册用户列表</h2>
+        <table id="table" class="table"></table>
+      </div>
+    </div>
+  </div>
+  <script src="ajax.js"></script>
+  <script>
+    window.onload =function(){
+      var username = document.getElementById('username');
+      var password = document.getElementById('password');
+      var verifyName = document.getElementById('verifyName');
+      var verifyPassword = document.getElementById('verifyPassword');
+      var regis = document.getElementById('regis');
+      var table = document.getElementById('table');
+      init()
+      function init(){
+        ajax({
+          // 读取数据库中的数据
+          method:'get',
+          url:'index.php',
+          data:'type=getUser',
+          success:function(data){
+            var list = JSON.parse(data);
+            console.log(list)
+            var a = "<colgroup><col width='30%' /><col width='30%' /><col width='40%' /></colgroup><tr><th>序号</th><th>用户名</th><th>密码</th></tr>"
+            for(var i =0;i<list.length;i++){
+              a += '<tr><td>'+list[i].id+'</td><td>'+list[i].username+'</td><td>'+list[i].password+'</td></tr>'
+            }
+            console.log(a)
+            table.innerHTML = a
+          }
+        })
+      }
+      username.onblur =  function(){
+        ajax({
+          method:'get',
+          url:'index.php',
+          data:'username='+username.value+'&type=checkUsername',
+          success:function(data){
+            var str = ''
+            if(JSON.parse(data).length > 0){
+              str = '用户名已经被注册!'
+            }else{
+              // 用户名可以注册，再进行下一步的判断
+              var preg1=/^[0-9a-zA-Z\u4e00-\u9fa5]{6,20}$/;
+              var preg2=/^[0-9a-zA-Z\u4e00-\u9fa5]{0,5}$/;
+              var preg3=/^[0-9a-zA-Z\u4e00-\u9fa5]{21,}$/;
+              if (username.value == '') {
+                str = '用户名不能为空！'
+              } else if (username.value.match(preg2)) {
+                str = '用户名不能少于6位'
+              } else if (username.value.match(preg1)) {
+                str = ''
+              } else if (username.value.match(preg3)) {
+                str = '用户名不能超过20位'
+              }
+            }
+            if(str != ''){
+              verifyName.innerHTML = str;
+              verifyName.className = 'tips wrong';
+            }else{
+              verifyName.innerHTML = '';
+              verifyName.className = 'tips right';
+            }
+          }
+        }) 
+      }
+      regis.onclick = function(){
+        ajax({
+          // 点击注册后，提交数据到数据库，如何同时让数据库中的数据与页面上的数据同步
+          method:'get',
+          url:'index.php',
+          data:'username='+username.value+'&password='+password.value+'&type=regis',
+          success:function(data){
+            console.log(data)
+            init()
+          }
+        })
+      }
+    }
+  </script>
+</body>
+</html>
