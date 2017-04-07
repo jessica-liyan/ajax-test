@@ -33,6 +33,8 @@
     .mask-wrap table input{padding:8px 1em;border:1px solid #ccc;width:100%;box-sizing:border-box;font-size:14px;color:#666;}
     .mask-wrap a{font-size:14px;color:#fff;display:inline-block;background:#338CEA;padding:8px 25px;margin:10px 0;}
     .mask-wrap .close{position:absolute;right:20px;top:50%;margin-top:-8px;}
+    #person{height:40px;line-height:40px;font-size:16px;color:#333;}
+    #logout{display:inline-block;font-size:14px;color:#338CEA;}
   </style>
 </head>
 <body>
@@ -44,32 +46,37 @@
   <div class="view">
     <div class="view-login">
       <div class="wrap">
-        <h2>注册</h2>
-        <form action="">
-          <div class="p-r mb-15 wrap-input">
-            <input type="text" name="username" placeholder="用户名" id="username">
-            <p id="verifyName" class="tips">用户名请用中文、英文或数字的组合并且为6-20个字符</p>
-          </div>
-          <div class="p-r mb-15 wrap-input">
-            <input type="text" name="password" placeholder="密码" id="password">
-            <p id="verifyPassword" class="tips"></p>
-          </div>
-          <a href="#" class="btn" id="regis">注册</a>
-        </form>
+        <div id="register">
+          <h2>注册</h2>
+          <form action="">
+            <div class="p-r mb-15 wrap-input">
+              <input type="text" name="username" placeholder="用户名" id="username">
+              <p id="verifyName" class="tips">用户名请用中文、英文或数字的组合并且为6-20个字符</p>
+            </div>
+            <div class="p-r mb-15 wrap-input">
+              <input type="text" name="password" placeholder="密码" id="password">
+              <p id="verifyPassword" class="tips"></p>
+            </div>
+            <a href="#" class="btn" id="regis">注册</a>
+          </form>
+        </div>
+        <div id="login">
+          <h2>登录</h2>
+          <form action="">
+            <div class="p-r mb-15 wrap-input">
+              <input type="text" name="username" placeholder="用户名" id="username2">
+              <p id="loginName" class="tips"></p>
+            </div>
+            <div class="p-r mb-15 wrap-input">
+              <input type="text" name="password" placeholder="密码" id="password2">
+              <p id="loginPassword" class="tips"></p>
+            </div>
+            <a href="#" class="btn" id="login">登录</a>
+          </form>
+        </div>
+        <h3 id="person"><span id="user"></span><a href="#" id="logout">退出登录</a></h3>
         <h2>注册用户列表</h2>
         <table id="table" class="table"></table>
-        <h2>登录</h2>
-        <form action="">
-          <div class="p-r mb-15 wrap-input">
-            <input type="text" name="username" placeholder="用户名" id="username2">
-            <p id="loginName" class="tips"></p>
-          </div>
-          <div class="p-r mb-15 wrap-input">
-            <input type="text" name="password" placeholder="密码" id="password2">
-            <p id="loginPassword" class="tips"></p>
-          </div>
-          <a href="#" class="btn" id="login">登录</a>
-        </form>
       </div>
     </div>
   </div>
@@ -102,6 +109,28 @@
       var username1 = document.getElementById('username1');
       var password1 = document.getElementById('password1');
       var submit = document.getElementById('submit');
+      // 初始化的时候，判断有没有登录，如果登录的话，获取cookie的用户名值，传入到页面中
+      // 登录成功之后，显示用户名和退出登录的按钮
+      changeStatus()
+      function changeStatus(){
+        var userVal = getCookie('username')
+        var person = document.getElementById('person');
+        var user = document.getElementById('user');
+        var register = document.getElementById('register');
+        var login = document.getElementById('login');
+        console.log(userVal)
+        if(userVal){
+          person.style.display = 'block';
+          user.innerText = userVal + '欢迎您！';
+          register.style.display = 'none';
+          login.style.display = 'none';
+        }else{
+          person.style.display = 'none';
+          register.style.display = 'block';
+          login.style.display = 'block';
+        }
+      }
+      
       init()
       function init(){
         ajax({
@@ -177,7 +206,7 @@
         ajax({
           method:'get',
           url:'index.php',
-          data:'username='+username.value+'&type=checkUsername',
+          data:'username='+username.value+'&password='+password.value+'&type=checkUsername',
           success:function(data){
             var str = ''
             if(JSON.parse(data).length > 0){
@@ -229,7 +258,7 @@
         ajax({
           method:'get',
           url:'index.php',
-          data:'username='+username2.value+'&type=checkUsername',
+          data:'username='+username2.value+'&password='+password2.value+'&type=checkUsername',
           success:function(data){
             if(JSON.parse(data).length == 0){
               loginName.innerHTML = '用户名不存在！'
@@ -241,6 +270,7 @@
                 if(password2.value == password){
                   loginPassword.innerHTML = ''
                   console.log('登录成功')
+                  changeStatus()
                 }else{
                   loginPassword.innerHTML = '密码错误！'
                   console.log('登录失败')
@@ -249,6 +279,33 @@
             }
           }
         })
+      }
+      // 退出登录
+      var logout = document.getElementById('logout');
+      logout.onclick = function(){
+        ajax({
+          method:'get',
+          url:'index.php',
+          data:'type=logout',
+          success:function(data){
+            // 问题：第一次点击没清除
+            var data = JSON.parse(data)
+            console.log(data.length ==0 )
+          }
+        })
+      }
+      // 获取浏览器的cookie
+      function getCookie(key){
+        // document.cookie是字符串，转换成数组
+        var arr1 = document.cookie.split('; ');
+        console.log(document.cookie)
+        console.log(arr1)
+        for(var i=0;i<arr1.length;i++){
+          var arr2 = arr1[i].split('=')
+          if(arr2[0]==key){
+            return(arr2[1])
+          }
+        } 
       }
     }
   </script>

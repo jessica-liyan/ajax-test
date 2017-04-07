@@ -21,6 +21,7 @@ switch ($type) {
   case 'checkUsername':
     $username = $_GET['username'];
     $db->where('username', $username);
+    setcookie("username", $username, time()+3600*24);
     $user = $db->get('user');
     echo json_encode($user);
   break;
@@ -80,6 +81,11 @@ switch ($type) {
     $db->delete ('user');
     $user = $db->get('user');
     echo json_encode($user);
+  break;
+  // 退出登录，清除cookie
+  case 'logout':
+    setcookie("username", '');
+    echo json_encode($_COOKIE);
   break;
 }
 ?>
