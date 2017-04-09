@@ -289,8 +289,8 @@
           data:'type=logout',
           success:function(data){
             // 问题：第一次点击没清除
-            var data = JSON.parse(data)
-            console.log(data.length ==0 )
+            console.log(data)
+            changeStatus()
           }
         })
       }

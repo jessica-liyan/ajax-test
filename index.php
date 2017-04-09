@@ -84,7 +84,7 @@ switch ($type) {
   break;
   // 退出登录，清除cookie
   case 'logout':
-    setcookie("username", '');
+    setcookie("username", null);
     echo json_encode($_COOKIE);
   break;
 }
