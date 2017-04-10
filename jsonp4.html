@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    ul,li,dl,dt,dd,div,p{list-style:none;padding:0;margin:0;}a{text-decoration:none;}
+    .ib{display:inline-block;}.v-t{vertical-align:top;}.pl-10{padding-left:10px;}
+    body{margin:0;padding:20px;}
+    input{width:200px;padding:8px;font-size:14px;color:#666;border:1px solid #ddd;box-sizing:border-box;}
+    input:focus{outline:none;border-color:#339900;}
+    .search{display:inline-block;vertical-align:middle;padding:8px;font-size:14px;color:#fff;background:#339900;}
+    #msg{font-size:12px;color:#999;padding:10px 0;}
+    .item{border-bottom:1px dashed #ddd;position:relative;padding:10px 0;}
+    .item img{width:90px;}
+    .item-tit a{display:inline-block;font-size:14px;color:#3377AA;padding-bottom:10px;}
+    .item-tit a:hover{text-decoration:underline;}
+    .item-info{font-size:12px;color:#666;}
+    .pages{padding:10px 0;}
+    .pages a{display:inline-block;font-size:14px;color:#3377AA;width:30px;height:30px;line-height:30px;text-align:center;}
+    .pages span{color:#666;margin:0 5px;cursor:pointer;}
+    .pages a:hover,.pages a.active{background:#3377AA;color:#fff;}
+  </style>
+</head>
+<body>
+  <input type="text" id="input">
+  <a href="#" id="btn" class="search">搜索</a>
+  <p id="msg"></p>
+  <div id="list"></div>
+  <div id="pages" class="pages"></div>
+  <script src="jquery.js"></script>
+  <script>
+    function search(data){
+      console.log(data)
+      var str = '检索出'+ data.total + '条数据'
+      $('#msg').html(str)
+      var books = ''
+      var page = ''
+      var price = ''
+      var pubdate = ''
+      data.books.forEach(function(el){
+        if(el.pages !== ''){
+          page = '/'+ el.pages + '页'
+        }
+        if(el.price !== ''){
+          price = '/'+ el.price
+        }
+        if(el.pubdate !== ''){
+          pubdate = '/'+ el.pubdate
+        }
+        var detail = el.author[0] + page + pubdate + price
+        books += '<div class="item"><a class="ib v-t"><img src="'+el.image+'" alt=""></a><div class="ib v-t pl-10"><p class="item-tit"><a href="'+el.alt+'">'+el.title+'</a></p><p class="item-info">'+detail+'</p></div></div>'
+      })
+      $('#list').html(books)
+      // 页码功能
+      // 计算页数
+      var n = Math.ceil(data.total / data.count)
+      var page = ''
+      var first = ''
+      var last = ''
+      console.log(n)
+      if(n<10){
+         for(var i=1;i<n+1;i++){
+           page += '<a href="javascript:;">'+i+'</a>'
+         }
+      }else{
+        for(var i=1;i<10;i++){
+          first += '<a href="javascript:;">'+i+'</a>'
+        }
+        last = '<a href="javascript:;">'+(n-1)+'</a><a href="javascript:;">'+n+'</a>'
+        page = first + '<span>...</span>'　+ last
+      }
+      $('#pages').html(page)
+      $('.pages a').each(function(idx,el){
+        $(el).click(function(){
+          console.log(this)
+          var oscript = document.createElement('script');
+          oscript.src = 'https://api.douban.com/v2/book/search?q='+val+'&callback=search&count=15&start='+idx*15+''
+          document.body.appendChild(oscript)
+          $(el).addClass('active');
+        }) 
+      })
+    }
+    var val;
+    $(function(){
+      $('#btn').click(function(){
+        val = $('#input').val()
+        if(val != ''){
+          var oscript = document.createElement('script');
+          oscript.src = 'https://api.douban.com/v2/book/search?q='+val+'&callback=search&count=15'
+          document.body.appendChild(oscript)
+        }         
+      })
+    })
+  </script>
+</body>
+</html>

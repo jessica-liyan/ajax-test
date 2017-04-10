@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    ul,li{list-style:none;padding:0;margin:0;}a{text-decoration:none;}
+    input{width:200px;padding:8px;font-size:14px;color:#666;border:1px solid #ddd;box-sizing:border-box;}
+    input:focus{outline:none;border-color:blue;}
+    #list{width:200px;border:1px solid #ddd;box-sizing:border-box;position:relative;margin-top:-1px;display:none;}
+    #list li a{font-size:14px;color:#666;display:inline-block;width:100%;padding:8px;box-sizing:border-box;}
+    #list li:hover{background:#F0F0F0;}
+  </style>
+</head>
+<body>
+  <input type="text" id="q">
+  <ul id="list"></ul>
+  <script src="jquery.js"></script>
+  <script>
+    // 百度搜索的接口https://www.baidu.com/s?wd=qq    wd参数为搜索框中的内容
+    function miaov(data){
+      var str = ''
+      console.log(data.s)
+      if(data.s.length !== 0){
+        data.s.forEach(function(el){
+          str += '<li><a href="https://www.baidu.com/s?wd='+el+'" target="_blank">'+el+'</a></li>'
+        })
+        $('#list').show()
+        $('#list').html(str)
+      }else{
+        $('#list').hide()
+      }
+    }
+    $(function(){
+      // 外部域名http://suggestion.baidu.com/ 参数wd(搜索内容) cb(callback)
+      $('#q').keyup(function(){
+        console.log(this.value)
+          var oscript = document.createElement('script');
+          oscript.src = 'http://suggestion.baidu.com/su?wd='+this.value+'&cb=miaov'
+          document.body.appendChild(oscript)
+      })
+    })
+  </script>
+</body>
+</html>
